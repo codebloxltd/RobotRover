@@ -5,9 +5,10 @@ namespace RobotRover.Domain
 {
     public class Rover : IRover
     {
-        //private bool _withinGrid = true;
         public Position Position { get; }
         public Grid Grid { get; set; }
+        public bool MoveIsPermissible { get; set; }
+        public List<string> Commands { get; set; }
 
         public Rover()
         {
@@ -25,6 +26,10 @@ namespace RobotRover.Domain
                 X = 40,
                 Y = 30
             };
+
+            // Initialise properties
+            Commands = new List<string>();
+            MoveIsPermissible = true;
         }
 
         public void SetPosition(int x, int y, string direction)
@@ -36,13 +41,13 @@ namespace RobotRover.Domain
 
         public void Move(string commands)
         {
-            char[] commandList = commands.ToCharArray(); // Split commands
+            MoveIsPermissible = true;
+            Commands.Clear();
+
+            char[] commandList = commands.ToCharArray(); // Split commands and perform each separate command
 
             foreach (char command in commandList)
             {
-                var withinGrid = true;
-
-                // Perform each command
                 switch (command)
                 {
                     case (char)Navigate.Left:
@@ -54,20 +59,19 @@ namespace RobotRover.Domain
                     default:
                         int steps;
                         int.TryParse(command.ToString(), out steps);
-                        withinGrid = CheckWithinGrid(steps);
-                        if (withinGrid)
+                        MoveIsPermissible = PermissibleMove(steps);
+                        if (MoveIsPermissible) // If the move is permissible then move rover
                             MoveForward(steps);
                         break;
                 }
 
-                if (!withinGrid)
+                if (!MoveIsPermissible)
                 {
-                    Console.WriteLine("Command: '{0}' is out of bounds", command);
+                    Commands.Add($"Command: '{command}' is out of bounds");
                     break;
                 }
 
-                // Display each command in console
-                Console.WriteLine("Command: '{0}' => [{1},{2},{3}]", command, Position.X, Position.Y, (char)Position.Direction);
+                Commands.Add($"Command: '{command}' => [{Position.X},{Position.Y},{(char)Position.Direction}]");
             }
         }
 
@@ -110,21 +114,21 @@ namespace RobotRover.Domain
             move[Position.Direction].Invoke();
         }
 
-        private bool CheckWithinGrid(int steps)
+        private bool PermissibleMove(int steps)
         {
-            var _withinGrid = true;
+            var permissible = true;
 
             var move = new Dictionary<Direction, Action>
             {
-                { Direction.North, () => _withinGrid = (Position.Y + steps) >= 0 && (Position.Y + steps) <= Grid.Y },
-                { Direction.East, () => _withinGrid = (Position.X + steps) >= 0 && (Position.X + steps) <= Grid.X },
-                { Direction.South, () => _withinGrid = (Position.Y - steps) >= 0 && (Position.Y - steps) <= Grid.Y },
-                { Direction.West, () => _withinGrid = (Position.X - steps) >= 0 && (Position.X - steps) <= Grid.X  }
+                { Direction.North, () => permissible = (Position.Y + steps) >= 0 && (Position.Y + steps) <= Grid.Y },
+                { Direction.East, () => permissible = (Position.X + steps) >= 0 && (Position.X + steps) <= Grid.X },
+                { Direction.South, () => permissible = (Position.Y - steps) >= 0 && (Position.Y - steps) <= Grid.Y },
+                { Direction.West, () => permissible = (Position.X - steps) >= 0 && (Position.X - steps) <= Grid.X  }
             };
 
             move[Position.Direction].Invoke();
 
-            return _withinGrid;
+            return permissible;
         }
     }
 }

@@ -30,6 +30,10 @@ namespace RobotRover.Application
                 // Make move
                 rover.Move(move);
 
+                // Display commands
+                foreach (var c in rover.Commands)
+                    Console.WriteLine(c);
+                
                 // Display end position
                 Console.WriteLine("Rover End position: [{0},{1},{2}]\n\n", rover.Position.X, rover.Position.Y, (char)rover.Position.Direction);
 
@@ -37,7 +41,6 @@ namespace RobotRover.Application
                 Console.WriteLine("Move Rover (enter move):");
                 move = Console.ReadLine().ToUpper();
             }
-            
         }
     }
 }
