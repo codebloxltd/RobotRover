@@ -28,7 +28,7 @@ namespace RobotRover.Domain
             };
 
             // Initialise properties
-            Commands = new List<string>();
+            Commands = new List<string>(); // List of commands actioned to output in console
             MoveIsPermissible = true;
         }
 
@@ -41,6 +41,7 @@ namespace RobotRover.Domain
 
         public void Move(string commands)
         {
+            // Reset properties for every move
             MoveIsPermissible = true;
             Commands.Clear();
 
@@ -67,7 +68,7 @@ namespace RobotRover.Domain
 
                 if (!MoveIsPermissible)
                 {
-                    Commands.Add($"Command: '{command}' is out of bounds");
+                    Commands.Add($"Command: '{command}' is impermissible");
                     break;
                 }
 
